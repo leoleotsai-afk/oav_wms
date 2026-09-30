@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: oav-wms
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: OAV_DB_SERVER
+        sync: false
+      - key: OAV_DB_PORT
+        sync: false
+      - key: OAV_DB_NAME
+        sync: false
+      - key: OAV_DB_USER
+        sync: false
+      - key: OAV_DB_PASSWORD
+        sync: false
