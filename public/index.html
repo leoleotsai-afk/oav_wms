@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>OAV ERP 庫存管理系統</title>
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#14304C">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon.svg">
@@ -12,21 +12,38 @@
 </head>
 <body>
 <div id="app">
-  <header class="topbar">
-    <div class="brand-mark">OAV</div>
-    <h1 id="page-title">OAV ERP 庫存管理系統</h1>
-    <span id="pending-hint" class="status-pill pending"></span>
-    <span id="status-pill" class="status-pill"><span class="dot"></span>線上</span>
-  </header>
-  <main id="main">
-    <div class="workspace">
-      <nav class="tree-pane" id="tree-pane"></nav>
-      <section class="detail-pane" id="detail-pane">
-        <div class="breadcrumb" id="breadcrumb"></div>
-        <div id="content"></div>
-      </section>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon" id="sidebar-brand-icon"></div>
+        <div>
+          <div class="sidebar-brand-title">OAV ERP</div>
+          <div class="sidebar-brand-sub">庫存管理系統</div>
+        </div>
+      </div>
+      <nav id="tree-pane"></nav>
+      <div class="sidebar-quote">全模組串接<br>從訂單到庫存，一次掌握</div>
+    </aside>
+
+    <div class="main-col">
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">主功能表</h1>
+          <p id="page-subtitle">跨模組庫存與訂單管理</p>
+        </div>
+        <div class="topbar-right">
+          <span id="pending-hint" class="status-pill pending"></span>
+          <span id="status-pill" class="status-pill"><span class="dot"></span>線上</span>
+        </div>
+      </header>
+      <main id="main">
+        <section class="detail-pane" id="detail-pane">
+          <div class="breadcrumb" id="breadcrumb"></div>
+          <div id="content"></div>
+        </section>
+      </main>
     </div>
-  </main>
+  </div>
 </div>
 
 <script src="js/icons.js"></script>

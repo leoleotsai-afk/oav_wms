@@ -205,6 +205,9 @@
     }
   }
 
+  const brandIconEl = document.getElementById("sidebar-brand-icon");
+  if (brandIconEl) brandIconEl.innerHTML = window.Icon("box", { size: 20 });
+
   buildTree();
   window.addEventListener("hashchange", render);
   render();
