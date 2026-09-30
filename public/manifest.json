@@ -1,0 +1,19 @@
+{
+  "name": "OAV ERP 庫存管理系統",
+  "short_name": "OAV ERP",
+  "description": "SD/MM/IM/PP 庫存管理系統主功能表",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# dependencies
+server/node_modules/
+
+# secrets - never commit real DB credentials
+server/.env
+
+# course reference material for a different sample project (oav00/gemio_wms)
+# contains that project's plaintext DB credentials; not part of this deliverable
+AI_25_專業庫存系統之一系統架構規畫_day04/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
