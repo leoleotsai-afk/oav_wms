@@ -61,7 +61,7 @@ window.renderMasterScreen = function renderMasterScreen(container, item) {
     toolbar.className = "toolbar-row";
     const addBtn = document.createElement("button");
     addBtn.className = "btn btn-primary";
-    addBtn.textContent = "＋ 新增";
+    addBtn.innerHTML = `${window.Icon("plus", { size: 16 })}新增`;
     addBtn.addEventListener("click", () => {
       editingKey = "__new__";
       draw();

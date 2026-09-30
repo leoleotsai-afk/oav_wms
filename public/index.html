@@ -13,17 +13,19 @@
 <body>
 <div id="app">
   <header class="topbar">
-    <button id="back-btn" class="back-btn" aria-label="返回">‹</button>
+    <div class="brand-mark">OAV</div>
+    <button id="back-btn" class="back-btn" aria-label="返回"></button>
     <h1 id="page-title">OAV ERP 庫存管理系統</h1>
-    <span id="pending-hint" class="status-pill"></span>
-    <span id="status-pill" class="status-pill">線上</span>
+    <span id="pending-hint" class="status-pill pending"></span>
+    <span id="status-pill" class="status-pill"><span class="dot"></span>線上</span>
   </header>
   <main id="main">
-    <div class="breadcrumb" id="breadcrumb"></div>
+    <nav class="breadcrumb" id="breadcrumb"></nav>
     <div id="content"></div>
   </main>
 </div>
 
+<script src="js/icons.js"></script>
 <script src="js/menu-data.js"></script>
 <script src="js/offline-queue.js"></script>
 <script src="js/master-maintenance.js"></script>

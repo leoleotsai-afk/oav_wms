@@ -4,7 +4,8 @@
 window.MENU_DATA = [
   {
     key: "sd",
-    icon: "📦",
+    icon: "box",
+    color: "#2563eb",
     name: "SD訂單模組",
     categories: [
       {
@@ -42,7 +43,8 @@ window.MENU_DATA = [
   },
   {
     key: "mm",
-    icon: "🛒",
+    icon: "cart",
+    color: "#7c3aed",
     name: "MM採購模組",
     categories: [
       {
@@ -80,7 +82,8 @@ window.MENU_DATA = [
   },
   {
     key: "im",
-    icon: "🏭",
+    icon: "warehouse",
+    color: "#059669",
     name: "IM庫存模組",
     categories: [
       {
@@ -118,7 +121,8 @@ window.MENU_DATA = [
   },
   {
     key: "pp",
-    icon: "⚙️",
+    icon: "cog",
+    color: "#d97706",
     name: "PP生產模組",
     categories: [
       {

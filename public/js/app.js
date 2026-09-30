@@ -16,21 +16,28 @@
 
   function updateStatusPill() {
     const online = navigator.onLine;
-    statusPill.textContent = online ? "線上" : "離線";
+    statusPill.innerHTML = `<span class="dot"></span>${online ? "線上" : "離線"}`;
     statusPill.className = "status-pill " + (online ? "online" : "offline");
   }
   window.addEventListener("online", updateStatusPill);
   window.addEventListener("offline", updateStatusPill);
   updateStatusPill();
 
+  function renderPendingHint(n) {
+    if (n > 0) {
+      pendingHint.innerHTML = `${window.Icon("pending", { size: 13 })}待重傳 ${n} 筆`;
+      pendingHint.style.display = "inline-flex";
+    } else {
+      pendingHint.style.display = "none";
+    }
+  }
+  renderPendingHint(0);
+
   if (window.OfflineQueue) {
     window.OfflineQueue.onChange(async () => {
-      const n = await window.OfflineQueue.count();
-      pendingHint.textContent = n > 0 ? `待重傳 ${n} 筆` : "";
+      renderPendingHint(await window.OfflineQueue.count());
     });
-    window.OfflineQueue.count().then((n) => {
-      pendingHint.textContent = n > 0 ? `待重傳 ${n} 筆` : "";
-    });
+    window.OfflineQueue.count().then(renderPendingHint);
   }
 
   function parseHash() {
@@ -57,28 +64,44 @@
     return renderLeaf(mod, cat, item);
   }
 
-  function setHeader(title, showBack, crumb) {
+  const CATEGORY_ICON = { org: "sitemap", master: "database", txn: "receipt", report: "chart" };
+
+  function setHeader(title, showBack, crumbs) {
     titleEl.textContent = title;
     backBtn.classList.toggle("visible", !!showBack);
-    breadcrumbEl.textContent = crumb || "";
+    backBtn.innerHTML = window.Icon("back", { size: 20 });
+    if (!crumbs || crumbs.length === 0) {
+      breadcrumbEl.innerHTML = "";
+    } else {
+      breadcrumbEl.innerHTML = crumbs
+        .map((c, i) => (i === 0 ? `<span>${c}</span>` : `<span class="sep">${window.Icon("chevronRight", { size: 12 })}</span><span>${c}</span>`))
+        .join("");
+    }
+  }
+
+  function iconBadge(iconName, color) {
+    const bg = color ? `${color}1a` : "var(--panel-2)";
+    const fg = color || "var(--muted)";
+    return `<span class="icon-badge" style="background:${bg};color:${fg};">${window.Icon(iconName, { size: 18 })}</span>`;
   }
 
   function renderHome() {
-    setHeader("OAV ERP 庫存管理系統", false, "");
+    setHeader("OAV ERP 庫存管理系統", false, null);
     const list = document.createElement("div");
     list.className = "list";
     MENU.forEach((mod) => {
       const row = document.createElement("div");
       row.className = "list-item";
+      row.style.setProperty("--module-color", mod.color);
       row.innerHTML = `
         <div class="left">
-          <div class="icon">${mod.icon}</div>
+          ${iconBadge(mod.icon, mod.color)}
           <div>
             <div class="name">${mod.name}</div>
             <div class="sub">${mod.categories.length} 大類</div>
           </div>
         </div>
-        <div class="chevron">›</div>
+        <div class="chevron">${window.Icon("chevronRight", { size: 16 })}</div>
       `;
       row.addEventListener("click", () => navigate([mod.key]));
       list.appendChild(row);
@@ -87,7 +110,7 @@
   }
 
   function renderModule(mod) {
-    setHeader(mod.name, true, "主功能表");
+    setHeader(mod.name, true, ["主功能表"]);
     const list = document.createElement("div");
     list.className = "list";
     mod.categories.forEach((cat) => {
@@ -95,13 +118,13 @@
       row.className = "list-item";
       row.innerHTML = `
         <div class="left">
-          <div class="icon">📁</div>
+          ${iconBadge(CATEGORY_ICON[cat.key] || "database", mod.color)}
           <div>
             <div class="name">${cat.name}</div>
             <div class="sub">${cat.items.length} 項功能</div>
           </div>
         </div>
-        <div class="chevron">›</div>
+        <div class="chevron">${window.Icon("chevronRight", { size: 16 })}</div>
       `;
       row.addEventListener("click", () => navigate([mod.key, cat.key]));
       list.appendChild(row);
@@ -110,18 +133,21 @@
   }
 
   function renderCategory(mod, cat) {
-    setHeader(cat.name, true, `主功能表 / ${mod.name}`);
+    setHeader(cat.name, true, ["主功能表", mod.name]);
     const list = document.createElement("div");
     list.className = "list";
     cat.items.forEach((item) => {
       const row = document.createElement("div");
       row.className = "list-item";
       row.innerHTML = `
-        <div>
-          <div class="name">${item.name}</div>
-          <div class="tables">${item.tables.join(", ")}</div>
+        <div class="left">
+          ${iconBadge(CATEGORY_ICON[cat.key] || "database", mod.color)}
+          <div>
+            <div class="name">${item.name}</div>
+            <div class="tables">${item.tables.join(", ")}</div>
+          </div>
         </div>
-        <div class="chevron">›</div>
+        <div class="chevron">${window.Icon("chevronRight", { size: 16 })}</div>
       `;
       row.addEventListener("click", () => navigate([mod.key, cat.key, item.key]));
       list.appendChild(row);
@@ -130,7 +156,7 @@
   }
 
   function renderLeaf(mod, cat, item) {
-    setHeader(item.name, true, `主功能表 / ${mod.name} / ${cat.name}`);
+    setHeader(item.name, true, ["主功能表", mod.name, cat.name]);
 
     if (item.type === "master" && window.renderMasterScreen) {
       const container = document.createElement("div");

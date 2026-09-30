@@ -60,7 +60,7 @@ window.renderDocumentScreen = function renderDocumentScreen(container, item) {
     toolbar.className = "toolbar-row";
     const addBtn = document.createElement("button");
     addBtn.className = "btn btn-primary";
-    addBtn.textContent = "＋ 新增單據";
+    addBtn.innerHTML = `${window.Icon("plus", { size: 16 })}新增單據`;
     addBtn.addEventListener("click", () => startNew());
     toolbar.appendChild(addBtn);
     wrap.appendChild(toolbar);
@@ -193,7 +193,7 @@ window.renderDocumentScreen = function renderDocumentScreen(container, item) {
     }
     const addRowBtn = document.createElement("button");
     addRowBtn.className = "btn btn-secondary btn-sm";
-    addRowBtn.textContent = "＋ 新增列";
+    addRowBtn.innerHTML = `${window.Icon("plus", { size: 14 })}新增列`;
     addRowBtn.addEventListener("click", () => {
       currentDetails.push(emptyDetailRow());
       draw();

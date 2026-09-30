@@ -1,11 +1,12 @@
 // App-shell 快取：讓主功能表在斷線時仍可瀏覽。
 // 交易資料一律走網路(交由 offline-queue.js 處理重傳)，不快取 API 回應。
-const CACHE_NAME = "oav-shell-v4";
+const CACHE_NAME = "oav-shell-v5";
 const SHELL_FILES = [
   "./",
   "./index.html",
   "./manifest.json",
   "./css/styles.css",
+  "./js/icons.js",
   "./js/menu-data.js",
   "./js/offline-queue.js",
   "./js/master-maintenance.js",
