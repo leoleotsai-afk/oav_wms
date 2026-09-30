@@ -1,13 +1,13 @@
 (function () {
-  const app = document.getElementById("app");
-  const titleEl = document.getElementById("page-title");
-  const backBtn = document.getElementById("back-btn");
+  const treePane = document.getElementById("tree-pane");
+  const contentEl = document.getElementById("content");
   const breadcrumbEl = document.getElementById("breadcrumb");
-  const mainEl = document.getElementById("content");
   const statusPill = document.getElementById("status-pill");
   const pendingHint = document.getElementById("pending-hint");
 
   const MENU = window.MENU_DATA;
+  const CATEGORY_ICON = { org: "sitemap", master: "database", txn: "receipt", report: "chart" };
+
   let currentDispose = null;
   function disposeCurrent() {
     if (typeof currentDispose === "function") currentDispose();
@@ -49,34 +49,15 @@
     location.hash = "#/" + path.join("/");
   }
 
-  function render() {
-    disposeCurrent();
-    const parts = parseHash();
-    if (parts.length === 0) return renderHome();
+  function resolveLeaf(parts) {
+    if (parts.length !== 3) return null;
     const mod = MENU.find((m) => m.key === parts[0]);
-    if (!mod) return renderHome();
-    if (parts.length === 1) return renderModule(mod);
+    if (!mod) return null;
     const cat = mod.categories.find((c) => c.key === parts[1]);
-    if (!cat) return renderModule(mod);
-    if (parts.length === 2) return renderCategory(mod, cat);
+    if (!cat) return null;
     const item = cat.items.find((i) => i.key === parts[2]);
-    if (!item) return renderCategory(mod, cat);
-    return renderLeaf(mod, cat, item);
-  }
-
-  const CATEGORY_ICON = { org: "sitemap", master: "database", txn: "receipt", report: "chart" };
-
-  function setHeader(title, showBack, crumbs) {
-    titleEl.textContent = title;
-    backBtn.classList.toggle("visible", !!showBack);
-    backBtn.innerHTML = window.Icon("back", { size: 20 });
-    if (!crumbs || crumbs.length === 0) {
-      breadcrumbEl.innerHTML = "";
-    } else {
-      breadcrumbEl.innerHTML = crumbs
-        .map((c, i) => (i === 0 ? `<span>${c}</span>` : `<span class="sep">${window.Icon("chevronRight", { size: 12 })}</span><span>${c}</span>`))
-        .join("");
-    }
+    if (!item) return null;
+    return { mod, cat, item };
   }
 
   function iconBadge(iconName, color) {
@@ -85,8 +66,8 @@
     return `<span class="icon-badge" style="background:${bg};color:${fg};">${window.Icon(iconName, { size: 18 })}</span>`;
   }
 
-  function renderHome() {
-    setHeader("OAV ERP 庫存管理系統", false, null);
+  // ---------- 左側/頂部：常駐的完整功能樹 ----------
+  function buildTree() {
     const wrap = document.createElement("div");
     wrap.className = "menu-tree";
 
@@ -119,6 +100,7 @@
         cat.items.forEach((item) => {
           const row = document.createElement("div");
           row.className = "list-item list-item-compact";
+          row.dataset.path = [mod.key, cat.key, item.key].join("/");
           row.innerHTML = `
             <div class="left">
               <div>
@@ -137,75 +119,52 @@
       wrap.appendChild(section);
     });
 
-    mainEl.replaceChildren(wrap);
+    treePane.replaceChildren(wrap);
   }
 
-  function renderModule(mod) {
-    setHeader(mod.name, true, ["主功能表"]);
-    const list = document.createElement("div");
-    list.className = "list";
-    mod.categories.forEach((cat) => {
-      const row = document.createElement("div");
-      row.className = "list-item";
-      row.innerHTML = `
-        <div class="left">
-          ${iconBadge(CATEGORY_ICON[cat.key] || "database", mod.color)}
-          <div>
-            <div class="name">${cat.name}</div>
-            <div class="sub">${cat.items.length} 項功能</div>
-          </div>
-        </div>
-        <div class="chevron">${window.Icon("chevronRight", { size: 16 })}</div>
-      `;
-      row.addEventListener("click", () => navigate([mod.key, cat.key]));
-      list.appendChild(row);
+  function highlightActive(path) {
+    treePane.querySelectorAll(".list-item-compact").forEach((row) => {
+      row.classList.toggle("active", row.dataset.path === path);
     });
-    mainEl.replaceChildren(list);
   }
 
-  function renderCategory(mod, cat) {
-    setHeader(cat.name, true, ["主功能表", mod.name]);
-    const list = document.createElement("div");
-    list.className = "list";
-    cat.items.forEach((item) => {
-      const row = document.createElement("div");
-      row.className = "list-item";
-      row.innerHTML = `
-        <div class="left">
-          ${iconBadge(CATEGORY_ICON[cat.key] || "database", mod.color)}
-          <div>
-            <div class="name">${item.name}</div>
-            <div class="tables">${item.tables.join(", ")}</div>
-          </div>
-        </div>
-        <div class="chevron">${window.Icon("chevronRight", { size: 16 })}</div>
-      `;
-      row.addEventListener("click", () => navigate([mod.key, cat.key, item.key]));
-      list.appendChild(row);
-    });
-    mainEl.replaceChildren(list);
+  // ---------- 右側/下方：選定功能的內容 ----------
+  function renderEmptyDetail() {
+    breadcrumbEl.innerHTML = "";
+    contentEl.innerHTML = `
+      <div class="placeholder empty-detail">
+        ${window.Icon("box", { size: 32 })}
+        <h2>請從左側功能樹選擇一個項目</h2>
+        <p>選擇組織架構、主數據、交易數據或報表輸出中的任一功能，內容會顯示在這裡。</p>
+      </div>
+    `;
   }
 
-  function renderLeaf(mod, cat, item) {
-    setHeader(item.name, true, ["主功能表", mod.name, cat.name]);
+  function setBreadcrumb(mod, cat, item) {
+    const crumbs = [mod.name, cat.name, item.name];
+    breadcrumbEl.innerHTML = crumbs
+      .map((c, i) => (i === 0 ? `<span>${c}</span>` : `<span class="sep">${window.Icon("chevronRight", { size: 12 })}</span><span>${c}</span>`))
+      .join("");
+  }
+
+  function renderDetail(mod, cat, item) {
+    setBreadcrumb(mod, cat, item);
 
     if (item.type === "master" && window.renderMasterScreen) {
       const container = document.createElement("div");
-      mainEl.replaceChildren(container);
+      contentEl.replaceChildren(container);
       currentDispose = window.renderMasterScreen(container, item);
       return;
     }
-
     if (item.type === "document" && window.renderDocumentScreen) {
       const container = document.createElement("div");
-      mainEl.replaceChildren(container);
+      contentEl.replaceChildren(container);
       currentDispose = window.renderDocumentScreen(container, item);
       return;
     }
-
     if (item.type === "report" && window.renderReportScreen) {
       const container = document.createElement("div");
-      mainEl.replaceChildren(container);
+      contentEl.replaceChildren(container);
       currentDispose = window.renderReportScreen(container, item);
       return;
     }
@@ -218,15 +177,28 @@
       <div class="tables">${item.isView ? "視圖" : "資料表"}：${item.tables.join(", ")}</div>
       <div class="badge">功能開發中</div>
     `;
-    mainEl.replaceChildren(box);
+    contentEl.replaceChildren(box);
   }
 
-  backBtn.addEventListener("click", () => {
+  function render() {
+    disposeCurrent();
     const parts = parseHash();
-    parts.pop();
-    navigate(parts);
-  });
+    const resolved = resolveLeaf(parts);
+    if (!resolved) {
+      highlightActive(null);
+      renderEmptyDetail();
+      return;
+    }
+    highlightActive(parts.join("/"));
+    renderDetail(resolved.mod, resolved.cat, resolved.item);
 
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      const detailPane = document.getElementById("detail-pane");
+      detailPane.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  buildTree();
   window.addEventListener("hashchange", render);
   render();
 

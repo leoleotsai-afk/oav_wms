@@ -70,21 +70,6 @@ header.topbar {
   letter-spacing: 0.4px;
 }
 
-header.topbar .back-btn {
-  flex: 0 0 auto;
-  background: none;
-  border: none;
-  color: var(--text);
-  padding: 6px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-header.topbar .back-btn.visible { display: inline-flex; }
-header.topbar .back-btn:active { background: var(--panel-2); }
-
 header.topbar h1 {
   font-size: 16px;
   margin: 0;
@@ -122,13 +107,44 @@ header.topbar h1 {
 .status-pill.pending { color: var(--accent); background: var(--accent-soft); }
 .status-pill.pending svg { flex: 0 0 auto; }
 
-/* ---------- 內容區 ---------- */
+/* ---------- 內容區：左側常駐功能樹 + 右側內容面板，同一頁面不做整頁切換 ---------- */
 main {
   flex: 1;
   padding: 18px 16px 32px;
-  max-width: 780px;
+  max-width: 1280px;
   width: 100%;
   margin: 0 auto;
+}
+
+.workspace {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.tree-pane {
+  flex: 0 0 340px;
+  position: sticky;
+  top: 76px;
+  max-height: calc(100dvh - 96px);
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.detail-pane {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .workspace { flex-direction: column; }
+  .tree-pane {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+    width: 100%;
+  }
+  .detail-pane { width: 100%; scroll-margin-top: 66px; }
 }
 
 .breadcrumb {
@@ -240,6 +256,18 @@ main {
 .list-item-compact:hover { border-color: transparent; box-shadow: none; background: var(--panel-2); }
 .list-item-compact:active { background: var(--panel-3); }
 .list-item-compact .name { font-size: 14px; }
+.list-item-compact.active {
+  background: var(--accent-soft);
+}
+.list-item-compact.active .name { color: var(--accent); }
+.list-item-compact.active .chevron { color: var(--accent); }
+
+.empty-detail {
+  padding: 56px 24px;
+  color: var(--muted);
+}
+.empty-detail svg { color: #cbd5e1; margin-bottom: 14px; }
+.empty-detail h2 { font-size: 16px; }
 
 /* ---------- 卡片/佔位區塊 ---------- */
 .placeholder {
