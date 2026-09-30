@@ -162,6 +162,13 @@
       currentDispose = window.renderDocumentScreen(container, item);
       return;
     }
+    if (item.type === "report" && item.drilldown && window.renderDrilldownScreen) {
+      const container = document.createElement("div");
+      contentEl.replaceChildren(container);
+      currentDispose = window.renderDrilldownScreen(container, item);
+      return;
+    }
+
     if (item.type === "report" && window.renderReportScreen) {
       const container = document.createElement("div");
       contentEl.replaceChildren(container);

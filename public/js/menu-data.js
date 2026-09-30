@@ -114,7 +114,7 @@ window.MENU_DATA = [
         name: "報表輸出",
         items: [
           { key: "stock-movement", name: "庫存異動明細", tables: ["庫存異動明細"], type: "report", apiKey: "stock-movement" },
-          { key: "daily-balance", name: "每日庫存餘額", tables: ["每日庫存餘額"], type: "report", apiKey: "daily-balance" }
+          { key: "daily-balance", name: "每日庫存餘額", tables: ["物料資料維護", "每日庫存餘額", "庫存異動明細"], type: "report", apiKey: "daily-balance", drilldown: true }
         ]
       }
     ]

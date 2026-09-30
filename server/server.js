@@ -169,13 +169,28 @@ app.delete("/api/master/:key", async (req, res) => {
 });
 
 // ---- 通用「報表輸出」API：全部唯讀 ----
+app.get("/api/report/:key/schema", (req, res) => {
+  const cfg = REPORT_TABLES[req.params.key];
+  if (!cfg) return res.status(404).json({ ok: false, error: "unknown report key" });
+  res.json({ ok: true, filterable: cfg.filterable || [], pivot: !!cfg.pivot, drilldown: cfg.drilldown || null });
+});
+
 app.get("/api/report/:key", async (req, res) => {
   const cfg = REPORT_TABLES[req.params.key];
   if (!cfg) return res.status(404).json({ ok: false, error: "unknown report key" });
   try {
     const pool = await getPool();
+    const request = pool.request();
+    const whereParts = [];
+    (cfg.filterable || []).forEach((col, i) => {
+      if (req.query[col] !== undefined && req.query[col] !== "") {
+        request.input(`f${i}`, req.query[col]);
+        whereParts.push(`[${col}] = @f${i}`);
+      }
+    });
     const orderBy = cfg.orderBy.map((c) => `[${c}]`).join(", ");
-    const result = await pool.request().query(`SELECT * FROM [dbo].[${cfg.source}] ORDER BY ${orderBy}`);
+    const whereClause = whereParts.length ? `WHERE ${whereParts.join(" AND ")}` : "";
+    const result = await request.query(`SELECT * FROM [dbo].[${cfg.source}] ${whereClause} ORDER BY ${orderBy}`);
     res.json({ ok: true, rows: result.recordset });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
