@@ -87,26 +87,57 @@
 
   function renderHome() {
     setHeader("OAV ERP 庫存管理系統", false, null);
-    const list = document.createElement("div");
-    list.className = "list";
+    const wrap = document.createElement("div");
+    wrap.className = "menu-tree";
+
     MENU.forEach((mod) => {
-      const row = document.createElement("div");
-      row.className = "list-item";
-      row.style.setProperty("--module-color", mod.color);
-      row.innerHTML = `
-        <div class="left">
-          ${iconBadge(mod.icon, mod.color)}
-          <div>
-            <div class="name">${mod.name}</div>
-            <div class="sub">${mod.categories.length} 大類</div>
-          </div>
+      const totalItems = mod.categories.reduce((n, c) => n + c.items.length, 0);
+
+      const section = document.createElement("section");
+      section.className = "module-section";
+
+      const band = document.createElement("div");
+      band.className = "module-band";
+      band.style.setProperty("--module-color", mod.color);
+      band.innerHTML = `
+        ${iconBadge(mod.icon, mod.color)}
+        <div>
+          <div class="module-band-name">${mod.name}</div>
+          <div class="module-band-meta">${mod.categories.length} 大類．${totalItems} 項功能</div>
         </div>
-        <div class="chevron">${window.Icon("chevronRight", { size: 16 })}</div>
       `;
-      row.addEventListener("click", () => navigate([mod.key]));
-      list.appendChild(row);
+      section.appendChild(band);
+
+      mod.categories.forEach((cat) => {
+        const catLabel = document.createElement("div");
+        catLabel.className = "category-label";
+        catLabel.innerHTML = `${window.Icon(CATEGORY_ICON[cat.key] || "database", { size: 14 })}<span>${cat.name}</span>`;
+        section.appendChild(catLabel);
+
+        const list = document.createElement("div");
+        list.className = "list list-compact";
+        cat.items.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "list-item list-item-compact";
+          row.innerHTML = `
+            <div class="left">
+              <div>
+                <div class="name">${item.name}</div>
+                <div class="tables">${item.tables.join(", ")}</div>
+              </div>
+            </div>
+            <div class="chevron">${window.Icon("chevronRight", { size: 15 })}</div>
+          `;
+          row.addEventListener("click", () => navigate([mod.key, cat.key, item.key]));
+          list.appendChild(row);
+        });
+        section.appendChild(list);
+      });
+
+      wrap.appendChild(section);
     });
-    mainEl.replaceChildren(list);
+
+    mainEl.replaceChildren(wrap);
   }
 
   function renderModule(mod) {
