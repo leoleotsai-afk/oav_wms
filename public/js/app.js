@@ -66,7 +66,24 @@
     return `<span class="icon-badge" style="background:${bg};color:${fg};">${window.Icon(iconName, { size: 18 })}</span>`;
   }
 
-  // ---------- 左側/頂部：常駐的完整功能樹 ----------
+  // ---------- 左側/頂部：常駐的完整功能樹(模組可收合) ----------
+  let expandedModuleKey = null;
+
+  function setModuleExpanded(modKey, expanded) {
+    const section = treePane.querySelector(`.module-section[data-mod="${modKey}"]`);
+    if (!section) return;
+    section.classList.toggle("expanded", expanded);
+    const body = section.querySelector(".module-body");
+    if (body) body.style.display = expanded ? "" : "none";
+  }
+
+  function toggleModule(modKey) {
+    const willExpand = expandedModuleKey !== modKey;
+    if (expandedModuleKey) setModuleExpanded(expandedModuleKey, false);
+    expandedModuleKey = willExpand ? modKey : null;
+    if (expandedModuleKey) setModuleExpanded(expandedModuleKey, true);
+  }
+
   function buildTree() {
     const wrap = document.createElement("div");
     wrap.className = "menu-tree";
@@ -76,24 +93,31 @@
 
       const section = document.createElement("section");
       section.className = "module-section";
+      section.dataset.mod = mod.key;
 
       const band = document.createElement("div");
       band.className = "module-band";
       band.style.setProperty("--module-color", mod.color);
       band.innerHTML = `
         ${iconBadge(mod.icon, mod.color)}
-        <div>
+        <div class="module-band-text">
           <div class="module-band-name">${mod.name}</div>
           <div class="module-band-meta">${mod.categories.length} 大類．${totalItems} 項功能</div>
         </div>
+        <div class="module-band-caret">${window.Icon("chevronRight", { size: 15 })}</div>
       `;
+      band.addEventListener("click", () => toggleModule(mod.key));
       section.appendChild(band);
+
+      const body = document.createElement("div");
+      body.className = "module-body";
+      body.style.display = "none";
 
       mod.categories.forEach((cat) => {
         const catLabel = document.createElement("div");
         catLabel.className = "category-label";
         catLabel.innerHTML = `${window.Icon(CATEGORY_ICON[cat.key] || "database", { size: 14 })}<span>${cat.name}</span>`;
-        section.appendChild(catLabel);
+        body.appendChild(catLabel);
 
         const list = document.createElement("div");
         list.className = "list list-compact";
@@ -110,22 +134,27 @@
             </div>
             <div class="chevron">${window.Icon("chevronRight", { size: 15 })}</div>
           `;
-          row.addEventListener("click", () => navigate([mod.key, cat.key, item.key]));
+          row.addEventListener("click", (e) => {
+            e.stopPropagation();
+            navigate([mod.key, cat.key, item.key]);
+          });
           list.appendChild(row);
         });
-        section.appendChild(list);
+        body.appendChild(list);
       });
 
+      section.appendChild(body);
       wrap.appendChild(section);
     });
 
     treePane.replaceChildren(wrap);
   }
 
-  function highlightActive(path) {
+  function highlightActive(path, modKey) {
     treePane.querySelectorAll(".list-item-compact").forEach((row) => {
       row.classList.toggle("active", row.dataset.path === path);
     });
+    if (modKey && expandedModuleKey !== modKey) toggleModule(modKey);
   }
 
   // ---------- 右側/下方：選定功能的內容 ----------
@@ -196,7 +225,7 @@
       renderEmptyDetail();
       return;
     }
-    highlightActive(parts.join("/"));
+    highlightActive(parts.join("/"), resolved.mod.key);
     renderDetail(resolved.mod, resolved.cat, resolved.item);
 
     if (window.matchMedia("(max-width: 900px)").matches) {
